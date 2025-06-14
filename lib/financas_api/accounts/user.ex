@@ -3,6 +3,7 @@ defmodule FinancasApi.Accounts.User do
   import Ecto.Changeset
   alias Pbkdf2
 
+  @derive {Jason.Encoder, only: [:id, :name, :email]}
   schema "users" do
     field :name, :string
     field :email, :string

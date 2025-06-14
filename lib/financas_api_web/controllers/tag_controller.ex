@@ -6,8 +6,13 @@ defmodule FinancasApiWeb.TagController do
 
   action_fallback FinancasApiWeb.FallbackController
 
-  def index(conn, _params) do
-    tags = Tagging.list_tags()
+  def index(conn, params) do
+    tags =
+      case Map.get(params, "user_id") do
+        nil -> Tagging.list_tags()
+        user_id -> Tagging.list_tags_by_user(user_id)
+      end
+
     render(conn, :index, tags: tags)
   end
 

@@ -21,7 +21,8 @@ defmodule FinancasApiWeb.TransactionJSON do
       description: transaction.description,
       value: transaction.value,
       type: transaction.type,
-      date: transaction.date
+      date: transaction.date,
+      tags: Enum.map(transaction.tags || [], fn tag -> %{id: tag.id, name: tag.name} end)
     }
   end
 end

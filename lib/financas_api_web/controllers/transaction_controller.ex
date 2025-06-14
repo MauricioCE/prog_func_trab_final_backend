@@ -11,6 +11,25 @@ defmodule FinancasApiWeb.TransactionController do
     render(conn, :index, transactions: transactions)
   end
 
+  def list_by_user(conn, %{"user_id" => user_id}) do
+    transactions =
+      Finances.list_transactions_by_user(user_id)
+      |> Enum.map(fn tx ->
+        tags = Enum.map(tx.tags_assoc || [], fn tag -> %{id: tag.id, name: tag.name} end)
+
+        tx
+        |> Map.from_struct()
+        |> Map.drop([:tags_assoc, :__meta__, :__struct__])
+        |> Map.put(:tags, tags)
+      end)
+
+    tags =
+      Finances.list_tags_by_user(user_id)
+      |> Enum.map(fn tag -> %{id: tag.id, name: tag.name} end)
+
+    json(conn, %{transactions: transactions, tags: tags})
+  end
+
   def create(conn, %{"transaction" => transaction_params}) do
     with {:ok, %Transaction{} = transaction} <- Finances.create_transaction(transaction_params) do
       conn
@@ -26,9 +45,14 @@ defmodule FinancasApiWeb.TransactionController do
   end
 
   def update(conn, %{"id" => id, "transaction" => transaction_params}) do
-    transaction = Finances.get_transaction!(id)
+    transaction =
+      Finances.get_transaction!(id)
+      |> FinancasApi.Repo.preload(:tags_assoc)
 
-    with {:ok, %Transaction{} = transaction} <- Finances.update_transaction(transaction, transaction_params) do
+    with {:ok, %Transaction{} = transaction} <-
+           Finances.update_transaction(transaction, transaction_params) do
+      transaction = FinancasApi.Repo.preload(transaction, :tags_assoc)
+      transaction = %{transaction | tags: transaction.tags_assoc}
       render(conn, :show, transaction: transaction)
     end
   end
