@@ -10,7 +10,9 @@ defmodule FinancasApi.Finances do
   alias FinancasApi.Tagging.Tag
 
   def list_transactions do
-    Repo.all(Transaction)
+    Transaction
+    |> Repo.all()
+    |> Repo.preload(:tags_assoc)
   end
 
   def list_transactions_by_user(user_id) do
@@ -25,6 +27,12 @@ defmodule FinancasApi.Finances do
   end
 
   def get_transaction!(user_id), do: Repo.get!(Transaction, user_id)
+
+  def get_transaction_by_id!(id) do
+    Transaction
+    |> Repo.get!(id)
+    |> Repo.preload(:tags_assoc)
+  end
 
   def create_transaction(attrs \\ %{}) do
     %Transaction{}
@@ -44,9 +52,9 @@ defmodule FinancasApi.Finances do
     Repo.delete(transaction)
   end
 
-  def change_transaction(%Transaction{} = transaction, attrs \\ %{}) do
-    Transaction.changeset(transaction, attrs)
-  end
+  # def change_transaction(%Transaction{} = transaction, attrs \\ %{}) do
+  #   Transaction.changeset(transaction, attrs)
+  # end
 
   defp handle_tags(changeset, attrs) do
     case Map.get(attrs, "tags") do

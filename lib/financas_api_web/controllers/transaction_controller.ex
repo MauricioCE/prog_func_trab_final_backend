@@ -7,8 +7,18 @@ defmodule FinancasApiWeb.TransactionController do
   action_fallback FinancasApiWeb.FallbackController
 
   def index(conn, _params) do
-    transactions = Finances.list_transactions()
-    render(conn, :index, transactions: transactions)
+    transactions =
+      Finances.list_transactions()
+      |> Enum.map(fn tx ->
+        tags = Enum.map(tx.tags_assoc || [], fn tag -> %{id: tag.id, name: tag.name} end)
+
+        tx
+        |> Map.from_struct()
+        |> Map.drop([:__meta__, :__struct__, :user, :tags_assoc])
+        |> Map.put(:tags, tags)
+      end)
+
+    json(conn, %{transactions: transactions})
   end
 
   def list_by_user(conn, %{"user_id" => user_id}) do
@@ -40,8 +50,17 @@ defmodule FinancasApiWeb.TransactionController do
   end
 
   def show(conn, %{"id" => id}) do
-    transaction = Finances.get_transaction!(id)
-    render(conn, :show, transaction: transaction)
+    transaction = Finances.get_transaction_by_id!(id)
+
+    tags = Enum.map(transaction.tags_assoc || [], fn tag -> %{id: tag.id, name: tag.name} end)
+
+    transaction =
+      transaction
+      |> Map.from_struct()
+      |> Map.drop([:__meta__, :__struct__, :user, :tags_assoc])
+      |> Map.put(:tags, tags)
+
+    json(conn, %{transaction: transaction})
   end
 
   def update(conn, %{"id" => id, "transaction" => transaction_params}) do
