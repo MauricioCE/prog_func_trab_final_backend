@@ -1,3 +1,26 @@
+<style>
+  h1 {
+    color: #3b6fab; 
+    padding-bottom: 8px;
+    font-weight: 800;
+  }
+  h2 {
+    color: #3b6fab;
+    padding-bottom: 6px;
+    font-weight: 600;
+  }
+  h3 {
+      color: #3b6fab;
+      padding-bottom: 4px;
+      font-weight: 500;
+  }
+  h4 {
+      color: #3b6fab; 
+      font-weight: 400;
+  }
+  
+</style>
+
 # Projeto final - Programação Funcional
 
 Este é o projeto final da cadeira de Programação Funcional, focado no desenvolvimento de uma aplicação de finanças pessoais.
